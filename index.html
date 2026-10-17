@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sales Dashboard</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">S</div>
+        <div><strong>SalesDesk</strong><span>BUSINESS INSIGHTS</span></div>
+      </div>
+
+      <p class="nav-caption">WORKSPACE</p>
+      <nav class="navigation">
+        <a class="nav-link active" href="#overview" data-page="overview">▦ &nbsp; Overview</a>
+        <a class="nav-link" href="#analytics" data-page="analytics">▥ &nbsp; Analytics</a>
+        <a class="nav-link" href="#records" data-page="records">☷ &nbsp; Transactions</a>
+      </nav>
+
+      <div class="sidebar-bottom">
+        <div class="sidebar-note">
+          <span class="note-dot"></span>
+          <div><strong>Live data</strong><small>Connected to sales API</small></div>
+        </div>
+        <div class="sidebar-footer">Sales performance<br>Dashboard</div>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">BUSINESS OVERVIEW</p>
+          <h1 id="pageTitle">Overview</h1>
+          <p class="page-subtitle" id="pageSubtitle">A clear view of your sales performance.</p>
+        </div>
+        <div class="topbar-actions">
+          <span class="date-chip">Sales report</span>
+          <button class="button button-primary" id="refreshBtn" type="button">↻ Refresh data</button>
+        </div>
+      </header>
+
+      <div id="status" class="status" role="status">Loading sales data...</div>
+
+      <section class="filter-bar">
+        <div class="filter-heading">
+          <span class="filter-symbol">☷</span>
+          <div><strong>Filters</strong><small>Refine sales data</small></div>
+        </div>
+
+        <label class="filter-control">
+          <span>Start date</span>
+          <input type="date" id="startDate">
+        </label>
+
+        <label class="filter-control">
+          <span>End date</span>
+          <input type="date" id="endDate">
+        </label>
+
+        <label class="filter-control">
+          <span>Region</span>
+          <select id="regionFilter"><option value="">All regions</option></select>
+        </label>
+
+        <label class="filter-control">
+          <span>Category</span>
+          <select id="categoryFilter"><option value="">All categories</option></select>
+        </label>
+
+        <button class="button button-quiet" id="resetFilters" type="button">Reset</button>
+      </section>
+
+      <!-- OVERVIEW PAGE -->
+      <section class="page-section" id="overviewPage" data-section="overview">
+        <div class="section-heading">
+          <div>
+            <h2>Performance snapshot</h2>
+            <p>Key metrics for the selected filters.</p>
+          </div>
+          <span class="section-tag">OVERVIEW</span>
+        </div>
+
+        <div class="kpi-grid">
+          <article class="kpi-card">
+            <div class="kpi-top"><span class="kpi-label">Total revenue</span><span class="kpi-icon revenue-icon">₹</span></div>
+            <div class="kpi-value" id="totalRevenue">₹0</div>
+            <div class="kpi-foot">Revenue after discounts</div>
+          </article>
+
+          <article class="kpi-card">
+            <div class="kpi-top"><span class="kpi-label">Total orders</span><span class="kpi-icon orders-icon">▤</span></div>
+            <div class="kpi-value" id="totalOrders">0</div>
+            <div class="kpi-foot">Unique orders</div>
+          </article>
+
+          <article class="kpi-card">
+            <div class="kpi-top"><span class="kpi-label">Units sold</span><span class="kpi-icon units-icon">▦</span></div>
+            <div class="kpi-value" id="totalUnits">0</div>
+            <div class="kpi-foot">Total quantity sold</div>
+          </article>
+
+          <article class="kpi-card">
+            <div class="kpi-top"><span class="kpi-label">Average order value</span><span class="kpi-icon average-icon">↗</span></div>
+            <div class="kpi-value" id="averageOrder">₹0</div>
+            <div class="kpi-foot">Revenue divided by orders</div>
+          </article>
+        </div>
+
+        <div class="overview-lower">
+          <article class="panel">
+            <div class="panel-heading">
+              <div><h3>At a glance</h3><p>Highlights from your selection</p></div>
+            </div>
+            <div class="insight-list">
+              <div class="insight-row"><span class="insight-bullet purple"></span><span>Top region</span><strong id="topRegion">—</strong></div>
+              <div class="insight-row"><span class="insight-bullet blue"></span><span>Top category</span><strong id="topCategory">—</strong></div>
+              <div class="insight-row"><span class="insight-bullet green"></span><span>Sales records</span><strong id="recordCount">0</strong></div>
+            </div>
+          </article>
+
+          <article class="panel">
+            <div class="panel-heading">
+              <div><h3>Revenue trend</h3><p>Monthly revenue over time</p></div>
+            </div>
+            <div class="chart-wrap compact-chart"><canvas id="overviewTrendChart"></canvas></div>
+          </article>
+        </div>
+      </section>
+
+      <!-- ANALYTICS PAGE -->
+      <section class="page-section" id="analyticsPage" data-section="analytics" hidden>
+        <div class="section-heading">
+          <div>
+            <h2>Sales analytics</h2>
+            <p>Explore revenue trends and sales distribution.</p>
+          </div>
+          <span class="section-tag">ANALYTICS</span>
+        </div>
+
+        <div class="analytics-grid">
+          <article class="panel wide-panel">
+            <div class="panel-heading"><div><h3>Monthly revenue</h3><p>Revenue by month</p></div></div>
+            <div class="chart-wrap large-chart"><canvas id="monthlyChart"></canvas></div>
+          </article>
+
+          <article class="panel">
+            <div class="panel-heading"><div><h3>Revenue by region</h3><p>Compare regional performance</p></div></div>
+            <div class="chart-wrap"><canvas id="regionChart"></canvas></div>
+          </article>
+
+          <article class="panel">
+            <div class="panel-heading"><div><h3>Revenue by category</h3><p>Category contribution</p></div></div>
+            <div class="chart-wrap"><canvas id="categoryChart"></canvas></div>
+          </article>
+
+          <article class="panel wide-panel">
+            <div class="panel-heading"><div><h3>Sales channel mix</h3><p>Revenue by sales channel</p></div></div>
+            <div class="chart-wrap large-chart"><canvas id="channelChart"></canvas></div>
+          </article>
+        </div>
+      </section>
+
+      <!-- TRANSACTIONS PAGE -->
+      <section class="page-section" id="recordsPage" data-section="records" hidden>
+        <div class="section-heading">
+          <div>
+            <h2>Transactions</h2>
+            <p>Search and review individual sales records.</p>
+          </div>
+          <span class="section-tag">RECORDS</span>
+        </div>
+
+        <article class="panel records-panel">
+          <div class="records-toolbar">
+            <div><h3>Sales records</h3><p id="tableSummary">Showing 0 records</p></div>
+            <label class="search-box">
+              <span>⌕</span>
+              <input type="search" id="searchInput" placeholder="Search orders, products, salesperson...">
+            </label>
+          </div>
+
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th><th>Order ID</th><th>Region</th><th>Channel</th>
+                  <th>Category</th><th>Product</th><th>Salesperson</th>
+                  <th class="numeric">Qty</th><th class="numeric">Revenue</th>
+                </tr>
+              </thead>
+              <tbody id="salesTable">
+                <tr><td colspan="9" class="empty-cell">Loading records...</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="table-footer">
+            <span id="tablePageInfo">—</span>
+            <div class="pagination">
+              <button class="button button-quiet" id="prevPage" type="button" disabled>Previous</button>
+              <button class="button button-quiet" id="nextPage" type="button" disabled>Next</button>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <footer class="page-footer">
+        <span>SalesDesk · Sales performance dashboard</span>
+        <span id="lastUpdated">Waiting for data</span>
+      </footer>
+    </main>
+  </div>
+</body>
+</html>
